@@ -1,14 +1,9 @@
 set -e
-bash scripts/build.sh 
+bash scripts/build.sh
 
-NETWORK=testnet
-export NEAR_ENV=$NETWORK
-SUFFIX=testnet
-
-CONTRACT_ACC=mpdao-token.$SUFFIX
-DECIMALS="000000"
-TOTAL_SUPPLY="500000000"
-OWNER=meta-pool-dao.$SUFFIX
+#!/bin/bash
+__dir=$(dirname "$0")
+. $__dir/0-testnet-set-vars.sh
 
 set -x
 near deploy $CONTRACT_ACC res/mpdao_token.wasm --initFunction new_default_meta --initArgs "{\"owner_id\":\"$OWNER\",\"total_supply\":\"$TOTAL_SUPPLY$DECIMALS\"}"

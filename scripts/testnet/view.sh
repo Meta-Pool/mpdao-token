@@ -1,4 +1,7 @@
-NEAR_ENV=testnet
+#!/bin/bash
+__dir=$(dirname "$0")
+. $__dir/0-testnet-set-vars.sh
+
 set -x
 near view mpdao-token.testnet get_owner_id
 near view mpdao-token.testnet get_minters
