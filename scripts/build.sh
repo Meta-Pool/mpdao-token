@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
+if [ "$#" -ne 1 ] || { [ "$1" != "reproducible" ] && [ "$1" != "non-reproducible" ]; }; then
+  echo "Usage: $0 [reproducible|non-reproducible]"
+  exit 1
+fi
 
-cargo build --target wasm32-unknown-unknown --release
+# ...existing code...
+cargo near build $1-wasm
 mkdir -p res
-cp -u target/wasm32-unknown-unknown/release/mpdao_token.wasm res/
+cp -u target/near/mpdao_token.wasm res/
+cp -u target/near/mpdao_token_abi.json res/

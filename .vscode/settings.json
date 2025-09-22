@@ -3,6 +3,7 @@
         "bindgen",
         "borsh",
         "cdylib",
+        "clippy",
         "codegen",
         "Cpath",
         "csvg",

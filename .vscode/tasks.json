@@ -3,12 +3,40 @@
 	"tasks": [
 		{
 			"type": "shell",
-			"command": "bash scripts/build.sh",
+			"command": "scripts/build.sh",
+			"args": [
+				"non-reproducible"
+			],
 			"problemMatcher": [
 				"$rustc"
 			],
 			"group": "build",
-			"label": "bash scripts/build.sh"
+			"label": "build-non-reproducible for local testing"
+		},
+		{
+			"type": "shell",
+			"command": "scripts/build.sh",
+			"args": [
+				"reproducible"
+			],
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": "build",
+			"label": "build reproducible/verifiable wasm"
+		},
+		{
+			"type": "shell",
+			"command": "cargo",
+			"args": [
+				"test",
+				"--lib"
+			],
+			"problemMatcher": [
+				"$rustc"
+			],
+			"group": "test",
+			"label": "cargo test --lib"
 		}
 	]
 }

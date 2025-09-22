@@ -34,6 +34,9 @@ use near_sdk::{
     PanicOnDefault, PromiseOrValue,
 };
 
+/// total supply is capped to 1 billion tokens (with 6 decimals)
+const CAPPED_TOTAL_SUPPLY: u128 = 1_000_000_000_000_000; // 1 billion tokens with 6 decimals
+
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
 #[borsh(crate = "near_sdk::borsh")]
@@ -149,6 +152,10 @@ impl Contract {
     // minters can mint
     #[payable]
     pub fn ft_mint(&mut self, amount: U128, memo: Option<String>) {
+        require!(
+            self.token.total_supply + amount.0 <= CAPPED_TOTAL_SUPPLY,
+            "Total supply is capped to 1 billion tokens"
+        );
         assert_one_yocto();
         self.assert_minter(&env::predecessor_account_id());
         self.token
@@ -341,7 +348,8 @@ mod tests {
         let mut context = get_context(accounts(2));
         testing_env!(context.build());
         // owner is accounts(2)
-        let mut contract = Contract::new_default_meta(accounts(2).into(), INITIAL_SUPPLY.into());
+        let mut contract =
+            Contract::new_default_meta(accounts(2).into(), (INITIAL_SUPPLY / 2).into());
 
         testing_env!(context
             .storage_usage(env::storage_usage())
@@ -363,6 +371,45 @@ mod tests {
             .predecessor_account_id(accounts(3))
             .build());
         let mint_amount = INITIAL_SUPPLY / 3;
+        contract.ft_mint(mint_amount.into(), None);
+
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .account_balance(env::account_balance())
+            .is_view(true)
+            .attached_deposit(NearToken::from_near(0))
+            .build());
+        assert_eq!(contract.ft_balance_of(accounts(3)).0, (mint_amount));
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_failed_mint_cap() {
+        let mut context = get_context(accounts(2));
+        testing_env!(context.build());
+        // owner is accounts(2)
+        let mut contract = Contract::new_default_meta(accounts(2).into(), INITIAL_SUPPLY.into());
+
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(NearToken::from_yoctonear(1))
+            .predecessor_account_id(accounts(2))
+            .build());
+        contract.add_minter(accounts(3));
+
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(contract.storage_balance_bounds().min.into())
+            .predecessor_account_id(accounts(3))
+            .build());
+        // Paying for account registration, aka storage deposit
+        contract.storage_deposit(None, None);
+        testing_env!(context
+            .storage_usage(env::storage_usage())
+            .attached_deposit(NearToken::from_yoctonear(1))
+            .predecessor_account_id(accounts(3))
+            .build());
+        let mint_amount = INITIAL_SUPPLY + 1;
         contract.ft_mint(mint_amount.into(), None);
 
         testing_env!(context
