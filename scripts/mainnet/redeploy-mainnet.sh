@@ -1,6 +1,3 @@
-set -ex
-bash scripts/build.sh
-
 #!/bin/bash
 __dir=$(dirname "$0")
 . $__dir/0-mainnet-set-vars.sh
