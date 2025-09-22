@@ -106,6 +106,11 @@ impl Contract {
             "can only be called by the owner"
         );
     }
+    fn assert_minter(&self, account_id: &AccountId) {
+        assert!(self.minters.contains(&account_id), "not a minter");
+    }
+
+
     // returns account ID of the owner.
     pub fn get_owner_id(self) -> AccountId {
         self.owner_id
@@ -143,10 +148,6 @@ impl Contract {
 
     pub fn get_minters(self) -> Vec<AccountId> {
         self.minters
-    }
-
-    pub fn assert_minter(&self, account_id: &AccountId) {
-        assert!(self.minters.contains(&account_id), "not a minter");
     }
 
     // minters can mint
